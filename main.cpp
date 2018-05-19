@@ -52,15 +52,30 @@ int main(){
     arma::mat transpose_eigvectors_dot_data_matrix = data_matrix*transpose_eigvectors;
     arma::mat whitened_data = transpose_eigvectors_dot_data_matrix*inverse_root_diagonal_eigvalues;
 
-    arma::vec arda_whitened_data_norm_2_axis_0;
+    arma::vec arma_whitened_data_norm_2_axis_0;
     std::vector < double > whitened_data_norm_2_axis_0;
     for( int x = 0; x < whitened_data.col(0).n_elem; x++ ){
         whitened_data_norm_2_axis_0.push_back( arma::norm(whitened_data.row(x), 2) );
     };
 
-    arda_whitened_data_norm_2_axis_0 = whitened_data_norm_2_axis_0;
+    arma_whitened_data_norm_2_axis_0 = whitened_data_norm_2_axis_0;
 
-    std::cout << arda_whitened_data_norm_2_axis_0 << std::endl;
+    arma::mat matrix_norm( arma_whitened_data_norm_2_axis_0.n_elem, 2 );
+
+    for( int x = 0; x < arma_whitened_data_norm_2_axis_0.n_elem; x++ ){
+        matrix_norm.row(x).col(0) = arma_whitened_data_norm_2_axis_0[x];
+        matrix_norm.row(x).col(1) = arma_whitened_data_norm_2_axis_0[x];
+    };
+
+    arma::mat m_nomr_multiply_wd_norm( matrix_norm.col(0).n_elem, 2 );
+    for( int x = 0; x < matrix_norm.col(0).n_elem; x++ ){
+        m_nomr_multiply_wd_norm.row(x).col(0) = matrix_norm.row(x).col(0) * whitened_data.row(x).col(0);
+        m_nomr_multiply_wd_norm.row(x).col(1) = matrix_norm.row(x).col(1) * whitened_data.row(x).col(1);
+    };
+
+    arma::mat covariance_m_nomr_multiply_wd_norm = arma::cov( m_nomr_multiply_wd_norm );
+
+    std::cout << covariance_m_nomr_multiply_wd_norm << std::endl;
 
     return 0;
 };
