@@ -2,6 +2,7 @@
 #include <iostream>
 #include "AudioFile.h"
 #include <string>
+#include <vector>
 
 std::string resource_forlder = "resources/";
 
@@ -51,8 +52,15 @@ int main(){
     arma::mat transpose_eigvectors_dot_data_matrix = data_matrix*transpose_eigvectors;
     arma::mat whitened_data = transpose_eigvectors_dot_data_matrix*inverse_root_diagonal_eigvalues;
 
-    std::cout << whitened_data << std::endl;
-    std::cout << "      ↑ whitened_data" << std::endl << std::endl;
+    arma::vec arda_whitened_data_norm_2_axis_0;
+    std::vector < double > whitened_data_norm_2_axis_0;
+    for( int x = 0; x < whitened_data.col(0).n_elem; x++ ){
+        whitened_data_norm_2_axis_0.push_back( arma::norm(whitened_data.row(x), 2) );
+    };
+
+    arda_whitened_data_norm_2_axis_0 = whitened_data_norm_2_axis_0;
+
+    std::cout << arda_whitened_data_norm_2_axis_0 << std::endl;
 
     return 0;
 };
