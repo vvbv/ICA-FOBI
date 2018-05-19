@@ -46,7 +46,13 @@ int main(){
         inverse_root_diagonal_eigvalues.col(x).row(x) = arma::sqrt( inverse_diagonal_eigvalues.col(x).row(x) );
     };
 
-    std::cout << inverse_root_diagonal_eigvalues << std::endl;
+    arma::mat transpose_eigvectors = eigvectors.t();
+
+    arma::mat transpose_eigvectors_dot_data_matrix = data_matrix*transpose_eigvectors;
+    arma::mat whitened_data = transpose_eigvectors_dot_data_matrix*inverse_root_diagonal_eigvalues;
+
+    std::cout << whitened_data << std::endl;
+    std::cout << "      ↑ whitened_data" << std::endl << std::endl;
 
     return 0;
 };
