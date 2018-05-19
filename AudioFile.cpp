@@ -338,8 +338,8 @@ bool AudioFile<T>::decodeWaveFile (std::vector<uint8_t>& fileData)
             if (bitDepth == 8)
             {
                 int32_t sampleAsInt = (int32_t) fileData[sampleIndex];
-                T sample = (T)(sampleAsInt - 128) / (T)128.;
-                
+                //T sample = (T)(sampleAsInt - 128) / (T)128.;
+                T sample = (T)(sampleAsInt) / 255 - 0.5;
                 samples[channel].push_back (sample);
             }
             else if (bitDepth == 16)
