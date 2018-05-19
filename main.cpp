@@ -36,14 +36,17 @@ int main(){
 
     arma::mat diagonal_eigvalues = arma::zeros<arma::mat>(eigvalues.n_elem,eigvalues.n_elem);
     for( int x = 0; x < eigvalues.n_elem; x++ ){
-        for( int w = 0; w < eigvalues.n_elem; w++ ){
-            if( x == w ){
-                diagonal_eigvalues.col(x).row(w) = eigvalues[w];
-            };
-        };
+        diagonal_eigvalues.col(x).row(x) = eigvalues[x];
     };
 
-    std::cout << diagonal_eigvalues << std::endl;
+    arma::mat inverse_diagonal_eigvalues = arma::inv( diagonal_eigvalues );
+
+    arma::mat inverse_root_diagonal_eigvalues = arma::zeros<arma::mat>(eigvalues.n_elem,eigvalues.n_elem);
+    for( int x = 0; x < eigvalues.n_elem; x++ ){
+        inverse_root_diagonal_eigvalues.col(x).row(x) = arma::sqrt( inverse_diagonal_eigvalues.col(x).row(x) );
+    };
+
+    std::cout << inverse_root_diagonal_eigvalues << std::endl;
 
     return 0;
 };
