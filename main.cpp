@@ -29,6 +29,8 @@ int main(){
     
     arma::mat covariance_matrix = arma::cov( data_matrix );
    
+    std::cout << std::endl << "Matriz de covarianza" << std::endl;
+    std::cout << covariance_matrix << std::endl;
 
     return 0;
 };
