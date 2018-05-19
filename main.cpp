@@ -12,22 +12,23 @@ int main(){
     AudioFile<double> audioFile_2;
     audioFile_1.load ( resource_forlder + "mix1.wav" );
     audioFile_2.load ( resource_forlder + "mix2.wav" );
-    //audioFile_1.printSummary();
-    //audioFile_2.printSummary();
 
     int channel = 0;
-    int numSamples = audioFile_1.getNumSamplesPerChannel();
+    int numSamples_1 = audioFile_1.getNumSamplesPerChannel();
+    int numSamples_2 = audioFile_2.getNumSamplesPerChannel();
 
-    /*for (int i = 0; i < numSamples; i++)
-    {
-        double currentSample = audioFile_1.samples[channel][i];
-    }*/
+    arma::Mat <double>  data_matrix(2, numSamples_1);
+    
+    for( int x = 0; x < numSamples_1; x++ ){
+        data_matrix.row(0).col(x) = audioFile_1.samples[channel][x];
+    };
 
-    std::cout << audioFile_2.samples[0][0] << " ";
-    std::cout << audioFile_2.samples[0][1] << " ";
-    std::cout << audioFile_2.samples[0][2] << " ";
-    std::cout << audioFile_2.samples[0][3] << " ";
-    std::cout << audioFile_2.samples[0][4] << " " << std::endl;
+    for( int x = 0; x < numSamples_2; x++ ){
+        data_matrix.row(1).col(x) = audioFile_2.samples[channel][x];
+    };
+
+    arma::mat x = arma::cov( data_matrix );
+    //std::cout << cov( data_matrix, data_matrix ) << std::endl;
 
     return 0;
 };
