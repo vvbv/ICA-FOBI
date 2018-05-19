@@ -29,8 +29,13 @@ int main(){
     
     arma::mat covariance_matrix = arma::cov( data_matrix );
    
-    std::cout << std::endl << "Matriz de covarianza" << std::endl;
-    std::cout << covariance_matrix << std::endl;
+    arma::vec eigval;
+    arma::mat eigvec;
+
+    arma::eig_sym(eigval, eigvec, covariance_matrix);
+
+    std::cout << std::endl << "EV" << std::endl;
+    std::cout << eigval << std::endl;
 
     return 0;
 };
