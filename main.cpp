@@ -29,13 +29,21 @@ int main(){
     
     arma::mat covariance_matrix = arma::cov( data_matrix );
    
-    arma::vec eigval;
-    arma::mat eigvec;
+    arma::vec eigvalues;
+    arma::mat eigvectors;
 
-    arma::eig_sym(eigval, eigvec, covariance_matrix);
+    arma::eig_sym(eigvalues, eigvectors, covariance_matrix);
 
-    std::cout << std::endl << "EV" << std::endl;
-    std::cout << eigval << std::endl;
+    arma::mat diagonal_eigvalues = arma::zeros<arma::mat>(eigvalues.n_elem,eigvalues.n_elem);
+    for( int x = 0; x < eigvalues.n_elem; x++ ){
+        for( int w = 0; w < eigvalues.n_elem; w++ ){
+            if( x == w ){
+                diagonal_eigvalues.col(x).row(w) = eigvalues[w];
+            };
+        };
+    };
+
+    std::cout << diagonal_eigvalues << std::endl;
 
     return 0;
 };
