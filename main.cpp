@@ -20,15 +20,17 @@ int main(){
     arma::Mat <double>  data_matrix(2, numSamples_1);
     
     for( int x = 0; x < numSamples_1; x++ ){
-        data_matrix.row(0).col(x) = audioFile_1.samples[channel][x];
+        data_matrix.col(0).row(x) = audioFile_1.samples[channel][x];
     };
 
     for( int x = 0; x < numSamples_2; x++ ){
-        data_matrix.row(1).col(x) = audioFile_2.samples[channel][x];
+        data_matrix.col(1).row(x) = audioFile_2.samples[channel][x];
     };
-
+    
+    //arma::mat y = {{0,1},{2,3},{2,3},{2,3},{2,3},{2,3},{2,3}};
+    //arma::mat x = arma::cov( y );
     arma::mat x = arma::cov( data_matrix );
-    //std::cout << cov( data_matrix, data_matrix ) << std::endl;
+    std::cout << x << std::endl;
 
     return 0;
 };
