@@ -1,13 +1,24 @@
+/**
+Implementacion del metodo FOBI, metodo de ICA
+Integrantes:
+	Jeison Cardona Gomez 1325562
+	Juan Camilo Perez Muñoz 1630779
+	Emily Esmeralda Carvajal Camelo 1630436
+**/
+
+
+//Libreria de Algebra lineal
 #include <armadillo>
-#include <iostream>
+//Libreroa para leer y escribir archivos de audio
 #include "AudioFile.h"
+#include <iostream>
 #include <string>
 #include <vector>
 
 std::string resource_forlder = "resources/";
 
 int main(){
-
+	//lee los archivos de audio
     AudioFile<double> audioFile_1;
     AudioFile<double> audioFile_2;
     audioFile_1.load ( resource_forlder + "mix1.wav" );
@@ -16,9 +27,9 @@ int main(){
     int channel = 0;
     int numSamples_1 = audioFile_1.getNumSamplesPerChannel();
     int numSamples_2 = audioFile_2.getNumSamplesPerChannel();
-
+    //crea una matriz para colocar los datos correspondientes a los archivos de audio recibidos
     arma::Mat <double>  data_matrix( numSamples_1, 2);
-    
+
     for( int x = 0; x < numSamples_1; x++ ){
         data_matrix.col(0).row(x) = audioFile_1.samples[channel][x];
     };
@@ -26,29 +37,32 @@ int main(){
     for( int x = 0; x < numSamples_2; x++ ){
         data_matrix.col(1).row(x) = audioFile_2.samples[channel][x];
     };
-    
+    //calcula la matriz de covarianza de la matriz de datos dada
     arma::mat covariance_matrix = arma::cov( data_matrix );
-   
     arma::vec eigvalues;
     arma::mat eigvectors;
-
+    //calcula los eigenvalores y eigenvectores de la matriz dada y los almacena en las variables dadas
     arma::eig_sym(eigvalues, eigvectors, covariance_matrix);
-
+    //crea una matriz cuadrada llena de ceros con tantas filas y columnas como eigenvalores
     arma::mat diagonal_eigvalues = arma::zeros<arma::mat>(eigvalues.n_elem,eigvalues.n_elem);
+    //llena la diagonal de la matriz anterior con los eigenvalores
     for( int x = 0; x < eigvalues.n_elem; x++ ){
         diagonal_eigvalues.col(x).row(x) = eigvalues[x];
     };
-
+    //calcula la inversa de la matriz diagonal
+    //esta matriz en el caso para la implementacion es 2x2 por lo tanto su calculo no es excesivamente costo
     arma::mat inverse_diagonal_eigvalues = arma::inv( diagonal_eigvalues );
-
+    //crea una matriz de cuadrada llena de ceros con tantas filas y columnas como eigenvalores
     arma::mat inverse_root_diagonal_eigvalues = arma::zeros<arma::mat>(eigvalues.n_elem,eigvalues.n_elem);
+    //llena la diagonal de la matriz anterior con la raiz de cada elemento de la matriz diagonal inversa
     for( int x = 0; x < eigvalues.n_elem; x++ ){
         inverse_root_diagonal_eigvalues.col(x).row(x) = arma::sqrt( inverse_diagonal_eigvalues.col(x).row(x) );
     };
-
+    //calcula la matriz transpuesta de la matriz de eigenvectores
     arma::mat transpose_eigvectors = eigvectors.t();
-
+    //multiplica la matriz de datos con la matriz tranpuesta de eigenvectores
     arma::mat transpose_eigvectors_dot_data_matrix = data_matrix*transpose_eigvectors;
+    //finaliza la primera etapa calculando la matriz blanqueada como un producto de matrices
     arma::mat whitened_data = transpose_eigvectors_dot_data_matrix*inverse_root_diagonal_eigvalues;
 
     arma::vec arma_whitened_data_norm_2_axis_0;
