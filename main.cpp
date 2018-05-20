@@ -75,7 +75,16 @@ int main(){
 
     arma::mat covariance_m_nomr_multiply_wd_norm = arma::cov( m_nomr_multiply_wd_norm );
 
-    std::cout << covariance_m_nomr_multiply_wd_norm << std::endl;
+    arma::vec eigvalues_m_nomr_multiply_wd_norm;
+    arma::mat eigvectors_m_nomr_multiply_wd_norm;
+
+    arma::eig_sym(eigvalues_m_nomr_multiply_wd_norm, eigvectors_m_nomr_multiply_wd_norm, covariance_m_nomr_multiply_wd_norm);
+
+    arma::mat transposed_eigvectors_m_nomr_multiply_wd_norm = eigvectors_m_nomr_multiply_wd_norm.t();
+
+    arma::mat source = eigvectors_m_nomr_multiply_wd_norm*whitened_data.t();
+
+    std::cout << "      Separación terminada" << std::endl << std::endl;
 
     return 0;
 };
