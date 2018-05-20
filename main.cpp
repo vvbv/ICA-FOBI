@@ -84,7 +84,7 @@ int main(){
 
     arma::mat source = eigvectors_m_nomr_multiply_wd_norm*whitened_data.t();
 
-    std::cout << "      Separación terminada" << std::endl << std::endl;
+    std::cout << "\nSeparación terminada: Test \n\n" << source.col( 0 ) << std::endl << std::endl;
 
     return 0;
 };
