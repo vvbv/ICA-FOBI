@@ -6,7 +6,6 @@
 
 std::string resource_forlder = "resources/";
 
-
 int main(){
 
     AudioFile<double> audioFile_1;
