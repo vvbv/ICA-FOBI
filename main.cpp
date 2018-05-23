@@ -15,9 +15,17 @@ Integrantes:
 #include <string>
 #include <vector>
 
+
+#include "matplotlibcpp.h"
+
 std::string resource_forlder = "resources/";
 
+namespace plt = matplotlibcpp;
+
+
 int main(){
+
+
 	//lee los archivos de audio
     AudioFile<double> audioFile_1;
     AudioFile<double> audioFile_2;
@@ -29,7 +37,8 @@ int main(){
     int numSamples_2 = audioFile_2.getNumSamplesPerChannel();
     //crea una matriz para colocar los datos correspondientes a los archivos de audio recibidos
     arma::Mat <double>  data_matrix( numSamples_1, 2);
-
+    
+    
     for( int x = 0; x < numSamples_1; x++ ){
         data_matrix.col(0).row(x) = audioFile_1.samples[channel][x];
     };
@@ -37,6 +46,14 @@ int main(){
     for( int x = 0; x < numSamples_2; x++ ){
         data_matrix.col(1).row(x) = audioFile_2.samples[channel][x];
     };
+    std::vector < double > sample1 = arma::conv_to< std::vector<double> >::from(data_matrix.col(0));
+    std::vector < double > sample2 = arma::conv_to< std::vector<double> >::from(data_matrix.col(1));
+	printf("si convirtio");
+	plt::plot(sample1,sample2,"r*");
+	plt::title("Original Data Matrix");
+	plt::save("DataMatrix.png");
+
+
     //calcula la matriz de covarianza de la matriz de datos dada
     arma::mat covariance_matrix = arma::cov( data_matrix );
     arma::vec eigvalues;
@@ -64,6 +81,15 @@ int main(){
     arma::mat transpose_eigvectors_dot_data_matrix = data_matrix*transpose_eigvectors;
     //finaliza la primera etapa calculando la matriz blanqueada como un producto de matrices
     arma::mat whitened_data = transpose_eigvectors_dot_data_matrix*inverse_root_diagonal_eigvalues;
+
+    std::vector < double > wsample1 = arma::conv_to< std::vector<double> >::from(whitened_data.col(0));
+    std::vector < double > wsample2 = arma::conv_to< std::vector<double> >::from(whitened_data.col(1));
+    plt::plot(wsample1,wsample2,"r*");
+    plt::title("Whitened Data Matrix");
+    plt::save("WhitenedMatrix.png");
+
+
+
     //SEGUNDA PARTE
     arma::vec arma_whitened_data_norm_2_axis_0;
     std::vector < double > whitened_data_norm_2_axis_0;
