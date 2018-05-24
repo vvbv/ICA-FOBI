@@ -14,14 +14,10 @@ Integrantes:
 #include <iostream>
 #include <string>
 #include <vector>
-
-
 #include "matplotlibcpp.h"
 
 std::string resource_forlder = "resources/";
-
 namespace plt = matplotlibcpp;
-
 
 int main(){
 
@@ -46,13 +42,14 @@ int main(){
     for( int x = 0; x < numSamples_2; x++ ){
         data_matrix.col(1).row(x) = audioFile_2.samples[channel][x];
     };
+
+    //graficar la matriz de datos 
     std::vector < double > sample1 = arma::conv_to< std::vector<double> >::from(data_matrix.col(0));
     std::vector < double > sample2 = arma::conv_to< std::vector<double> >::from(data_matrix.col(1));
-	printf("si convirtio");
-	plt::plot(sample1,sample2,"r*");
+	plt::plot(sample1,sample2,"y*");
 	plt::title("Original Data Matrix");
 	plt::save("DataMatrix.png");
-
+    plt::clf();
 
     //calcula la matriz de covarianza de la matriz de datos dada
     arma::mat covariance_matrix = arma::cov( data_matrix );
@@ -82,12 +79,13 @@ int main(){
     //finaliza la primera etapa calculando la matriz blanqueada como un producto de matrices
     arma::mat whitened_data = transpose_eigvectors_dot_data_matrix*inverse_root_diagonal_eigvalues;
 
+    //graficar la matriz blanqueada
     std::vector < double > wsample1 = arma::conv_to< std::vector<double> >::from(whitened_data.col(0));
     std::vector < double > wsample2 = arma::conv_to< std::vector<double> >::from(whitened_data.col(1));
-    plt::plot(wsample1,wsample2,"r*");
+    plt::plot(wsample1,wsample2,"y*");//#6B0D0D
     plt::title("Whitened Data Matrix");
     plt::save("WhitenedMatrix.png");
-
+    plt::clf();
 
 
     //SEGUNDA PARTE
@@ -124,7 +122,59 @@ int main(){
     //se hace el producto de matriz de eigenvectores con la matriz blanqueada transpuesta
     arma::mat source = eigvectors_m_nomr_multiply_wd_norm*whitened_data.t();
 
-    std::cout << "\nSeparación terminada: Test \n\n" << source.col( 0 ) << std::endl << std::endl;
+    //graficar las fuentes obtenidas
+    std::vector < double > ssample1 = arma::conv_to< std::vector<double> >::from(source.row(0));
+    std::vector < double > ssample2 = arma::conv_to< std::vector<double> >::from(source.row(1));
+
+    std::vector<double> time;
+    double sampleRate = audioFile_1.getSampleRate();
+    
+    for(int i=0;i<numSamples_1;i++){
+        time.push_back((i/sampleRate)*1000);
+    }
+
+    //grafica fuente uno
+    plt::plot(time,ssample1);
+    plt::title("FOBI Source 1");
+    plt::save("FOBISource1.png");
+    plt::clf();
+
+    //grafica fuente dos
+    plt::plot(time,ssample2);
+    plt::title("FOBI Source 2");
+    plt::save("FOBISource2.png");
+    plt::clf();
+
+    //COMPARACION
+    //lee los archivos de audio
+    AudioFile<double> original1;
+    AudioFile<double> original2;
+    original1.load ( resource_forlder + "source1.wav" );
+    original2.load ( resource_forlder + "source2.wav" );
+
+    int oSamples_1 = original1.getNumSamplesPerChannel();
+
+    std::vector < double > originalSource1;
+    std::vector < double > originalSource2;
+
+    for( int x = 0; x < oSamples_1; x++ ){
+        originalSource1.push_back(original2.samples[channel][x]);
+        originalSource2.push_back(original1.samples[channel][x]);
+        //ssample2[x] = ssample2[x] / 255.0 - 0.5;
+    };
+    //std::cout << ssample2.size() << std::endl;
+    //plt::plot(time,ssample2,"k");
+    plt::plot(time,originalSource2,"m");
+    plt::title(" original 2");
+    plt::save("Original2.png");
+    plt::clf();
+
+    //plt::plot(time,ssample1,"k");
+    plt::plot(time,originalSource1,"m");
+    plt::title(" original  1");
+    plt::save("Original1.png");
+    plt::clf();
+
 
     return 0;
 };
