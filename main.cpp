@@ -9,7 +9,7 @@ Integrantes:
 
 //Libreria de Algebra lineal
 #include <armadillo>
-//Libreroa para leer y escribir archivos de audio
+//Libreria para leer y escribir archivos de audio
 #include "AudioFile.h"
 #include <iostream>
 #include <string>
