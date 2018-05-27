@@ -11,10 +11,12 @@ Integrantes:
 #include <armadillo>
 //Libreria para leer y escribir archivos de audio
 #include "AudioFile.h"
+//Libreria para dibujar graficas
+#include "matplotlibcpp.h"
 #include <iostream>
 #include <string>
 #include <vector>
-#include "matplotlibcpp.h"
+
 
 std::string resource_forlder = "resources/";
 namespace plt = matplotlibcpp;
@@ -122,9 +124,37 @@ int main(){
     //se hace el producto de matriz de eigenvectores con la matriz blanqueada transpuesta
     arma::mat source = eigvectors_m_nomr_multiply_wd_norm*whitened_data.t();
 
-    //graficar las fuentes obtenidas
     std::vector < double > ssample1 = arma::conv_to< std::vector<double> >::from(source.row(0));
     std::vector < double > ssample2 = arma::conv_to< std::vector<double> >::from(source.row(1));
+
+    //las fuentes se retornan invertidas por lo que las giramos nuevamente para poder compararlas
+    for(int i=0;i<numSamples_1;i++){
+         ssample1[i]=ssample1[i]*(-1);
+         ssample2[i]=ssample2[i]*(-1);
+
+    }
+    //GUARDANDO LOS AUDIOS GENERADOS
+    /////////////
+    AudioFile<double> source1Generated;
+    source1Generated.setAudioBufferSize (1, 50000);
+    source1Generated.setSampleRate (8000);
+    source1Generated.setBitDepth(8);
+    int numSamples1 = ssample2.size();
+
+    AudioFile<double> source2Generated;
+    source2Generated.setAudioBufferSize (1, 50000);
+    source2Generated.setSampleRate (8000);
+    source2Generated.setBitDepth(8);
+
+    for( int x = 0; x < numSamples1; x++ ){
+        source1Generated.samples[0][x]= ssample2[x]/10;
+        source2Generated.samples[0][x]= ssample1[x]/10;
+    };
+    
+    source1Generated.save ("resources/source1Generated.wav",AudioFileFormat::Wave);
+    source2Generated.save ("resources/source2Generated.wav",AudioFileFormat::Wave);
+    ////////////
+
 
     std::vector<double> time;
     double sampleRate = audioFile_1.getSampleRate();
@@ -149,32 +179,43 @@ int main(){
     //lee los archivos de audio
     AudioFile<double> original1;
     AudioFile<double> original2;
+    AudioFile<double> generada1;
+    AudioFile<double> generada2;
     original1.load ( resource_forlder + "source1.wav" );
     original2.load ( resource_forlder + "source2.wav" );
+    generada1.load ( resource_forlder + "source1Generated.wav" );
+    generada2.load ( resource_forlder + "source2Generated.wav" );
+
 
     int oSamples_1 = original1.getNumSamplesPerChannel();
 
+
     std::vector < double > originalSource1;
     std::vector < double > originalSource2;
+    std::vector < double > generada1fobi;
+    std::vector < double > generada2fobi;
 
     for( int x = 0; x < oSamples_1; x++ ){
         originalSource1.push_back(original2.samples[channel][x]);
         originalSource2.push_back(original1.samples[channel][x]);
-        //ssample2[x] = ssample2[x] / 255.0 - 0.5;
+        generada1fobi.push_back(generada1.samples[channel][x]);
+        generada2fobi.push_back(generada2.samples[channel][x]);
+
     };
-    //std::cout << ssample2.size() << std::endl;
-    //plt::plot(time,ssample2,"k");
-    plt::plot(time,originalSource2,"m");
-    plt::title(" original 2");
-    plt::save("Original2.png");
+
+    plt::named_plot("generated",time,generada1fobi,"k");
+    plt::named_plot("original",time,originalSource2,"m");
+    plt::legend();
+    plt::title("Generated vs Original 1");
+    plt::save("GvsO1.png");
     plt::clf();
 
-    //plt::plot(time,ssample1,"k");
-    plt::plot(time,originalSource1,"m");
-    plt::title(" original  1");
-    plt::save("Original1.png");
+    plt::named_plot("generated",time,generada2fobi,"k");
+    plt::named_plot("original",time,originalSource1,"m");
+    plt::title("Generated vs Original 2");
+    plt::legend();
+    plt::save("GvsO2.png");
     plt::clf();
-
 
     return 0;
 };
