@@ -240,19 +240,15 @@ int main(){
     plt::save( output_forlder + "original_source_2.png");
     plt::clf();
 
-    //plt::named_plot("generated",time_,generada1fobi,"k");
-    //plt::named_plot("original",time_,originalSource2,"m");
     plt::named_plot("generated",generada1fobi,"k");
-    plt::named_plot("original",originalSource2,"m");
+    plt::named_plot("original",originalSource1,"m");
     plt::legend();
     plt::title("Generated vs Original 1");
     plt::save( output_forlder + "generated_vs_original_1.png");
     plt::clf();
 
-    //plt::named_plot("generated",time_,generada2fobi,"k");
-    //plt::named_plot("original",time_,originalSource1,"m");
     plt::named_plot("generated",generada2fobi,"k");
-    plt::named_plot("original",originalSource1,"m");
+    plt::named_plot("original",originalSource2,"m");
     plt::legend();
     plt::title("Generated vs Original 2");
     plt::save( output_forlder + "generated_vs_original_2.png");
