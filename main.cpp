@@ -19,10 +19,26 @@ Integrantes:
 
 
 std::string resource_forlder = "resources/";
+std::string output_forlder = "output/";
 namespace plt = matplotlibcpp;
 
 int main(){
 
+    std::string eleccion = "";
+    std::cout << "\n    ICA - FOBI\n" << std::endl;
+    std::cout << "      1: Prueba base" << std::endl;
+    std::cout << "      2: Prueba Frank - DM5\n" << std::endl;
+    std::cout << "#!> ";
+    std::cin >> eleccion;
+    if(eleccion == "1"){
+        resource_forlder += "PRUEBA_0/";
+        std::cout << "\n#! Seleccionada prueba base" << std::endl;
+    }else if(eleccion == "2"){
+        resource_forlder += "PRUEBA_1/";
+        std::cout << "\n#! Seleccionada prueba Frank - DM5" << std::endl;
+    }else{
+        std::cout << "\n#! Seleccionada prueba base(Default)" << std::endl;
+    };
 
 	//lee los archivos de audio
     AudioFile<double> audioFile_1;
@@ -30,9 +46,14 @@ int main(){
     audioFile_1.load ( resource_forlder + "mix1.wav" );
     audioFile_2.load ( resource_forlder + "mix2.wav" );
 
+    std::cout << "#! Lectura de archivos a separar. [ok]" << std::endl;
+
     int channel = 0;
     int numSamples_1 = audioFile_1.getNumSamplesPerChannel();
     int numSamples_2 = audioFile_2.getNumSamplesPerChannel();
+
+    int sampleRate_mix = audioFile_1.getSampleRate();
+
     //crea una matriz para colocar los datos correspondientes a los archivos de audio recibidos
     arma::Mat <double>  data_matrix( numSamples_1, 2);
     
@@ -50,9 +71,11 @@ int main(){
     std::vector < double > sample2 = arma::conv_to< std::vector<double> >::from(data_matrix.col(1));
 	plt::plot(sample1,sample2,"y*");
 	plt::title("Original Data Matrix");
-	plt::save("DataMatrix.png");
+	plt::save(output_forlder + "DataMatrix.png");
     plt::clf();
 
+    std::cout << "#! Gráfica de datos base. [ok]" << std::endl;
+    std::cout << "#! Inicio de separación (FOBI)." << std::endl;
     //calcula la matriz de covarianza de la matriz de datos dada
     arma::mat covariance_matrix = arma::cov( data_matrix );
     arma::vec eigvalues;
@@ -80,15 +103,15 @@ int main(){
     arma::mat transpose_eigvectors_dot_data_matrix = data_matrix*transpose_eigvectors;
     //finaliza la primera etapa calculando la matriz blanqueada como un producto de matrices
     arma::mat whitened_data = transpose_eigvectors_dot_data_matrix*inverse_root_diagonal_eigvalues;
-
+    std::cout << "#! Blanqueamiento de matriz (FOBI). [ok]" << std::endl;
     //graficar la matriz blanqueada
     std::vector < double > wsample1 = arma::conv_to< std::vector<double> >::from(whitened_data.col(0));
     std::vector < double > wsample2 = arma::conv_to< std::vector<double> >::from(whitened_data.col(1));
     plt::plot(wsample1,wsample2,"y*");//#6B0D0D
     plt::title("Whitened Data Matrix");
-    plt::save("WhitenedMatrix.png");
+    plt::save(output_forlder + "WhitenedMatrix.png");
     plt::clf();
-
+    std::cout << "#! Gráfica de matriz blanqueada (FOBI). [ok]" << std::endl;
 
     //SEGUNDA PARTE
     arma::vec arma_whitened_data_norm_2_axis_0;
@@ -123,7 +146,7 @@ int main(){
     arma::mat transposed_eigvectors_m_nomr_multiply_wd_norm = eigvectors_m_nomr_multiply_wd_norm.t();
     //se hace el producto de matriz de eigenvectores con la matriz blanqueada transpuesta
     arma::mat source = eigvectors_m_nomr_multiply_wd_norm*whitened_data.t();
-
+    std::cout << "#! Separación completada (FOBI). [ok]" << std::endl;
     std::vector < double > ssample1 = arma::conv_to< std::vector<double> >::from(source.row(0));
     std::vector < double > ssample2 = arma::conv_to< std::vector<double> >::from(source.row(1));
 
@@ -135,15 +158,18 @@ int main(){
     }
     //GUARDANDO LOS AUDIOS GENERADOS
     /////////////
+
+    std::cout << "#! Inicio de almacenamiento de las fuentes." << std::endl;
+
     AudioFile<double> source1Generated;
-    source1Generated.setAudioBufferSize (1, 50000);
-    source1Generated.setSampleRate (8000);
+    source1Generated.setAudioBufferSize (1, numSamples_1);
+    source1Generated.setSampleRate (sampleRate_mix);
     source1Generated.setBitDepth(8);
     int numSamples1 = ssample2.size();
 
     AudioFile<double> source2Generated;
-    source2Generated.setAudioBufferSize (1, 50000);
-    source2Generated.setSampleRate (8000);
+    source2Generated.setAudioBufferSize (1, numSamples_2);
+    source2Generated.setSampleRate (sampleRate_mix);
     source2Generated.setBitDepth(8);
 
     for( int x = 0; x < numSamples1; x++ ){
@@ -151,28 +177,30 @@ int main(){
         source2Generated.samples[0][x]= ssample1[x]/10;
     };
     
-    source1Generated.save ("resources/source1Generated.wav",AudioFileFormat::Wave);
-    source2Generated.save ("resources/source2Generated.wav",AudioFileFormat::Wave);
+    source1Generated.save ( output_forlder + "source1Generated.wav", AudioFileFormat::Wave);
+    source2Generated.save ( output_forlder + "source2Generated.wav", AudioFileFormat::Wave);
+
+    std::cout << "#! Almacenamiento de las fuentes completado. [ok]" << std::endl;
     ////////////
+    std::cout << "#! Graficando resultados." << std::endl;
 
-
-    std::vector<double> time;
+    std::vector<double> time_;
     double sampleRate = audioFile_1.getSampleRate();
     
     for(int i=0;i<numSamples_1;i++){
-        time.push_back((i/sampleRate)*1000);
+        time_.push_back((i/sampleRate)*1000);
     }
 
     //grafica fuente uno
-    plt::plot(time,ssample1);
+    plt::plot(time_,ssample1);
     plt::title("FOBI Source 1");
-    plt::save("FOBISource1.png");
+    plt::save(output_forlder + "FOBISource1.png");
     plt::clf();
 
     //grafica fuente dos
-    plt::plot(time,ssample2);
+    plt::plot(time_,ssample2);
     plt::title("FOBI Source 2");
-    plt::save("FOBISource2.png");
+    plt::save(output_forlder + "FOBISource2.png");
     plt::clf();
 
     //COMPARACION
@@ -183,12 +211,10 @@ int main(){
     AudioFile<double> generada2;
     original1.load ( resource_forlder + "source1.wav" );
     original2.load ( resource_forlder + "source2.wav" );
-    generada1.load ( resource_forlder + "source1Generated.wav" );
-    generada2.load ( resource_forlder + "source2Generated.wav" );
-
+    generada1.load ( output_forlder + "source1Generated.wav" );
+    generada2.load ( output_forlder + "source2Generated.wav" );
 
     int oSamples_1 = original1.getNumSamplesPerChannel();
-
 
     std::vector < double > originalSource1;
     std::vector < double > originalSource2;
@@ -200,22 +226,39 @@ int main(){
         originalSource2.push_back(original1.samples[channel][x]);
         generada1fobi.push_back(generada1.samples[channel][x]);
         generada2fobi.push_back(generada2.samples[channel][x]);
-
     };
 
-    plt::named_plot("generated",time,generada1fobi,"k");
-    plt::named_plot("original",time,originalSource2,"m");
+    plt::named_plot("Original source 1",originalSource1,"m");
+    plt::legend();
+    plt::title("Original source 1");
+    plt::save( output_forlder + "original_source_1.png");
+    plt::clf();
+
+    plt::named_plot("Original source 2",originalSource2,"m");
+    plt::legend();
+    plt::title("Original source 2");
+    plt::save( output_forlder + "original_source_2.png");
+    plt::clf();
+
+    //plt::named_plot("generated",time_,generada1fobi,"k");
+    //plt::named_plot("original",time_,originalSource2,"m");
+    plt::named_plot("generated",generada1fobi,"k");
+    plt::named_plot("original",originalSource2,"m");
     plt::legend();
     plt::title("Generated vs Original 1");
-    plt::save("GvsO1.png");
+    plt::save( output_forlder + "generated_vs_original_1.png");
     plt::clf();
 
-    plt::named_plot("generated",time,generada2fobi,"k");
-    plt::named_plot("original",time,originalSource1,"m");
-    plt::title("Generated vs Original 2");
+    //plt::named_plot("generated",time_,generada2fobi,"k");
+    //plt::named_plot("original",time_,originalSource1,"m");
+    plt::named_plot("generated",generada2fobi,"k");
+    plt::named_plot("original",originalSource1,"m");
     plt::legend();
-    plt::save("GvsO2.png");
+    plt::title("Generated vs Original 2");
+    plt::save( output_forlder + "generated_vs_original_2.png");
     plt::clf();
 
+    std::cout << "#! Gráficas generadas y almacenadas. [ok]" << std::endl;
+    std::cout << "#! Fin del proceso.\n" << std::endl;
     return 0;
 };
