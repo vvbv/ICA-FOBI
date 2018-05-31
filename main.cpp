@@ -57,13 +57,17 @@ int main(){
     //crea una matriz para colocar los datos correspondientes a los archivos de audio recibidos
     arma::Mat <double>  data_matrix( numSamples_1, 2);
     
+    std::vector < double > originalMix1;
+    std::vector < double > originalMix2;
     
     for( int x = 0; x < numSamples_1; x++ ){
         data_matrix.col(0).row(x) = audioFile_1.samples[channel][x];
+        originalMix1.push_back( audioFile_1.samples[channel][x] );
     };
 
     for( int x = 0; x < numSamples_2; x++ ){
         data_matrix.col(1).row(x) = audioFile_2.samples[channel][x];
+        originalMix2.push_back( audioFile_2.samples[channel][x] );
     };
 
     //graficar la matriz de datos 
@@ -227,6 +231,18 @@ int main(){
         generada1fobi.push_back(generada1.samples[channel][x]);
         generada2fobi.push_back(generada2.samples[channel][x]);
     };
+
+    plt::named_plot("Original mix 1",originalMix1,"m");
+    plt::legend();
+    plt::title("Original mix 1");
+    plt::save( output_forlder + "original_mix_1.png");
+    plt::clf();
+
+    plt::named_plot("Original mix 2",originalMix2,"m");
+    plt::legend();
+    plt::title("Original mix 2");
+    plt::save( output_forlder + "original_mix_2.png");
+    plt::clf();
 
     plt::named_plot("Original source 1",originalSource1,"m");
     plt::legend();
