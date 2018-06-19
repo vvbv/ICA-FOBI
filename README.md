@@ -15,8 +15,8 @@ Separación de audio usando el método FOBI( Fourth-Order Blind Identification )
  $ make <br>
  $ sudo make install <br>
 
-# para instalar matplotlib
- $ sudo apt-get install python-matplotlib python-numpy python2.7-dev
+# Instalación de matplotlib
+> $ sudo apt-get install python-matplotlib python-numpy python2.7-dev
 
 # Compilación 
 > $./deploy.sh <br>
